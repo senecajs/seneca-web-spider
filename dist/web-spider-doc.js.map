@@ -1,0 +1,1 @@
+{"version":3,"file":"web-spider-doc.js","sourceRoot":"","sources":["../src/web-spider-doc.ts"],"names":[],"mappings":"AAAA,gEAAgE;AAEhE,MAAM,IAAI,GAAG;IACX,QAAQ,EAAE;QACR,QAAQ,EAAE;YACR,IAAI,EAAE,6BAA6B;SACpC;KACF;CACF,CAAA;AAED,eAAe,IAAI,CAAA;AAEnB,IAAI,WAAW,KAAK,OAAO,CAAC,MAAM,CAAC,EAAE,CAAC;IACpC,MAAM,CAAC,OAAO,GAAG,IAAI,CAAA;AACvB,CAAC"}
