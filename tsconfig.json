@@ -3,13 +3,18 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "isolatedModules": true,
-    "module": "commonjs",
-    "noEmitOnError": true,
+    "module": "ES2022",
+    "noEmitOnError": false,
     "outDir": "dist",
-    "resolveJsonModule": true,
     "rootDir": "src",
-    "strict": true,
-    "target": "ES2019"
+    "strict": false,
+    "target": "ES2022",
+    "skipLibCheck": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "moduleResolution": "node",
   },
-  "exclude": ["test", "dist", "node_modules"]
+  "exclude": ["test", "dist", "node_modules"],
+  "include": ["./src/**/*"]
 }
