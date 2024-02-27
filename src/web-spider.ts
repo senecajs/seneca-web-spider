@@ -5,8 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 type WebSpiderOptions = {
-  debug: boolean,
-  canon: any,
+  debug?: boolean,
+  url: string,
+  meta: string,
+  body: string,
 }
 
 function WebSpider(this: any, options: WebSpiderOptions) {
@@ -40,52 +42,62 @@ function WebSpider(this: any, options: WebSpiderOptions) {
       },
 
     })
-  
-    await crawler.run(['https://senecajs.org/'])
-
+    
+    //Crawl the given URL or the default URL for now.
+    await crawler.run([options.url || 'https://senecajs.org/'])
 
     //Preview next feature, saving meta data separately
-    // -------------------- IN PROGRESS
-    const meta = {
-      id: uuidv4(),
-      name: 'Seneca-web-spider',
-      url: 'https://senecajs.org/',
-      size: pageSize,
-      pages: numberOfPages,
-    }
-
-    for (let item in meta) {
-      //The caon could be crawl/meta
-      await seneca.entity(options.canon).data$(meta).save$()
-    }
+    // -------------------- IN PROGRESS ----------------
 
     for (let item of allData) {
-      //The caon could be crawl/content
-      await seneca.entity(options.canon).data$(item).save$()
+      const meta = {
+        id: uuidv4(),
+        name: options.url || 'Seneca-web-spider' + uuidv4(),
+        url: 'https://senecajs.org/',
+        size: pageSize,
+        pages: numberOfPages,
+      }
+
+      //The canon could be crawl/meta
+      //Saving META
+      await saveMetaData(seneca, meta, options);
+
+      const listMeta = await seneca.entity(options.meta).list$()
+      console.log(listMeta)
+
+      //The canon could be crawl/content
+      //Saving BODY
+      await saveBodyData(seneca, item, options);
+
+      const listBody = await seneca.entity(options.body).list$()
+      console.log(listBody)
     }
-
-    const list = await seneca.entity(options.canon).list$()
-
-    //----------------------- END OF IN PROGRESS
-    return list
-    
+    //----------------------- END OF IN PROGRESS ----------------
   }
 
-  return {
-    ok: true,
-    name: 'web-spider',
-    data: {
-      startCrawlMsg,
-    },
+  async function saveMetaData(seneca: any, meta: any, options: WebSpiderOptions) {
+    await seneca
+      .entity(options.meta)
+      .data$(meta)
+      .save$();
   }
-
+  
+  async function saveBodyData(seneca: any, item: any, options: WebSpiderOptions) {
+    await seneca
+      .entity(options.body)
+      .data$(item)
+      .save$();
+  }
+  
 }
 
 // Default options.
 const defaults: WebSpiderOptions = {
   // TODO: Enable debug logging
   debug: false,
-  canon: 'web-spider/content',
+  meta: 'web-spider/meta',
+  body: 'web-spider/body',
+  url: 'https://senecajs.org/',
 }
 
 Object.assign(WebSpider, { defaults })
