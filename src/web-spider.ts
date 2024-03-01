@@ -6,9 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 type WebSpiderOptions = {
   debug?: boolean,
+  canon: {
+    meta: string,
+    body: string,
+  }
   url: string,
-  meta: string,
-  body: string,
+  crawlerOptions?: {
+    fullCrawl?: boolean,
+  }
 }
 
 function WebSpider(this: any, options: WebSpiderOptions) {
@@ -28,17 +33,20 @@ function WebSpider(this: any, options: WebSpiderOptions) {
     const crawler = new PlaywrightCrawler({
       async requestHandler({ request, page, enqueueLinks, log }) {
 
-        const textContent = await page.textContent('body')
+        const textContent = await page.textContent('body');
+        const cleanedContent = cleanTextContent(textContent);
         pageSize = textContent.length
         numberOfPages++
 
         const url = request.loadedUrl
-        log.info(`Fetched content from ${url}`)
+        // log.info(`Fetched content from ${url}`)
   
         // Push the HTML content and URL into the allData array
-        allData.push({ url, textContent })
-  
-        await enqueueLinks()
+        allData.push({ url, textContent: cleanedContent})
+        
+        if (options.crawlerOptions?.fullCrawl) {
+          await enqueueLinks(); // Only call this if FullCrawl is true
+        }
       },
 
     })
@@ -62,32 +70,42 @@ function WebSpider(this: any, options: WebSpiderOptions) {
       //Saving META
       await saveMetaData(seneca, meta, options);
 
-      const listMeta = await seneca.entity(options.meta).list$()
-      console.log(listMeta)
+      const listMeta = await seneca.entity(options.canon.meta).list$()
+      console.log('listMeta', listMeta)
 
       //The canon could be crawl/content
       //Saving BODY
       await saveBodyData(seneca, item, options);
 
-      const listBody = await seneca.entity(options.body).list$()
-      console.log(listBody)
+      const listBody = await seneca.entity(options.canon.body).list$()
+      console.log('listBody', listBody)
     }
     //----------------------- END OF IN PROGRESS ----------------
   }
 
   async function saveMetaData(seneca: any, meta: any, options: WebSpiderOptions) {
     await seneca
-      .entity(options.meta)
+      .entity(options.canon.meta)
       .data$(meta)
       .save$();
+
+      // await seneca.post('sys:spider,spider:web', meta)
   }
   
   async function saveBodyData(seneca: any, item: any, options: WebSpiderOptions) {
     await seneca
-      .entity(options.body)
+      .entity(options.canon.body)
       .data$(item)
       .save$();
+
+      // await seneca.post('sys:spider,spider:web', meta)
   }
+
+  function cleanTextContent(textContent: string): string {
+    // Replace multiple spaces, tabs, and newlines with a single space
+    const cleanedContent = textContent.replace(/\s+/g, ' ').trim();
+    return cleanedContent;
+  }  
   
 }
 
@@ -95,9 +113,14 @@ function WebSpider(this: any, options: WebSpiderOptions) {
 const defaults: WebSpiderOptions = {
   // TODO: Enable debug logging
   debug: false,
-  meta: 'web-spider/meta',
-  body: 'web-spider/body',
+  canon:{
+    meta: 'web-spider/meta',
+    body: 'web-spider/body',
+  },
   url: 'https://senecajs.org/',
+  crawlerOptions: {
+    fullCrawl: false,
+  }
 }
 
 Object.assign(WebSpider, { defaults })
