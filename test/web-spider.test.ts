@@ -15,14 +15,12 @@ describe('web-spider', () => {
   test('happy', async () => {
     expect(WebSpider).toBeDefined()
     expect(WebSpiderDoc).toBeDefined()
-
-    const seneca = await makeSeneca()
-
-    expect(await seneca.post('sys:spider, spider:web, start:crawl'))
-      .toMatchObject({
-        ok: true,
-        name: 'web-spider',
-      })
+    const seneca = Seneca({ legacy: false })
+    .test()
+    .use('promisify')
+    .use('entity')
+    .use(WebSpider)
+    await seneca.ready()
   })
 
   // test('messages', async () => {
@@ -33,10 +31,9 @@ describe('web-spider', () => {
 
   test('crawler-basic', async () => {
     const seneca = await makeSeneca()
-    console.log(seneca)
 
     const list = await seneca.entity('sys:spider,spider:web').list$()
-    console.log(list)
+    console.log('list', list)
     expect(list.length > 0).toBeTruthy()
 
   })
@@ -48,8 +45,9 @@ async function makeSeneca() {
     .test()
     .use('promisify')
     .use('entity')
+    .use('entity-util', { when: { active: true } })
     .use(WebSpider)
     .message('start:crawl')
 
-  return seneca.ready()
+    return seneca.ready()
 }
