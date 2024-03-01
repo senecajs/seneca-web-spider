@@ -1,12 +1,13 @@
 type WebSpiderOptions = {
-    debug: boolean;
-    canon: any;
-};
-declare function WebSpider(this: any, options: WebSpiderOptions): {
-    ok: boolean;
-    name: string;
-    data: {
-        startCrawlMsg: (this: any, msg: any) => Promise<any>;
+    debug?: boolean;
+    canon: {
+        meta: string;
+        body: string;
+    };
+    url: string;
+    crawlerOptions?: {
+        fullCrawl?: boolean;
     };
 };
+declare function WebSpider(this: any, options: WebSpiderOptions): void;
 export default WebSpider;
