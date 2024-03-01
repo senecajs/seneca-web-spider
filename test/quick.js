@@ -1,6 +1,5 @@
 const Seneca = require('seneca')
-
-const { PlaywrightCrawler, Dataset } = require('crawlee')
+const { PlaywrightCrawler } = require('crawlee')
 
 // async function runCrawler() {
 
@@ -9,8 +8,11 @@ async function WebSpider() {
 
   const crawler = new PlaywrightCrawler({
     async requestHandler({ request, page, enqueueLinks, log }) {
-      // Use page.content() to get the entire HTML content of the page
+
       const textContent = await page.textContent('body')
+      pageSize = textContent.length
+      numberOfPages++
+
       const url = request.loadedUrl
       log.info(`Fetched content from ${url}`)
 
@@ -19,9 +21,10 @@ async function WebSpider() {
 
       await enqueueLinks()
     },
-    // Add any other necessary configuration for the crawler
-  })
 
+  })
+  
+  //Crawl the given URL or the default URL for now.
   await crawler.run(['https://senecajs.org/'])
 
   // After crawling is complete, the allData array will have the content from all visited pages
